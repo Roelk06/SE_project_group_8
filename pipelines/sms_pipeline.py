@@ -9,7 +9,7 @@ from scipy.sparse import save_npz
 from pathlib import Path
 
 
-base_dir = Path(__file__).resolve().parent
+base_dir = Path(__file__).resolve().parent.parent
 raw_file = base_dir / "data" / "raw" / "SMS" / "SMSSpamCollection"
 processed_dir = base_dir / "data" / "processed" / "SMS"
 processed_dir.mkdir(parents=True, exist_ok=True)
