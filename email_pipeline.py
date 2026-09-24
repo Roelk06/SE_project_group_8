@@ -14,7 +14,6 @@ processed_dir.mkdir(parents=True, exist_ok=True)
 
 data = pd.read_csv(raw_file)
 data['text'] = data["Subject"].fillna('') + ' ' + data["Message"].fillna('')
-data = data.drop_duplicates(subset=['text']).copy()
 
 labels_map = {'ham': 0, 'spam': 1}
 data['label'] = data['Spam/Ham'].map(labels_map)
@@ -26,7 +25,7 @@ y = data['label'].to_numpy(dtype = int)
 x_train, x_temp, y_train, y_temp = train_test_split(x, y, test_size=0.3, stratify=y, random_state=42)
 x_val, x_test, y_val, y_test = train_test_split(x_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42)
 
-tfidf = TfidfVectorizer(max_features=5000, ngram_range=(1, 2), stop_words='english')
+tfidf = TfidfVectorizer(max_features=5000, ngram_range=(1, 2), stop_words='english', token_pattern=r'(?u)\b[a-zA-Z]{2,}\b')
 
 x_train_tfidf = tfidf.fit_transform(x_train)
 x_val_tfidf = tfidf.transform(x_val)
