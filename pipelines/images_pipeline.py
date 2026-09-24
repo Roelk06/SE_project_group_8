@@ -2,11 +2,12 @@ import os
 import cv2
 import numpy as np
 from sklearn.model_selection import train_test_split
+from pathlib import Path
 
-raw_dir = "data/raw/images"
-processed_dir = "data/processed/images"
-
-os.makedirs(processed_dir, exist_ok=True)
+base_dir = Path(__file__).resolve().parent.parent
+raw_dir = base_dir / "data" / "raw" / "images"
+processed_dir = base_dir / "data" / "processed" / "images"
+processed_dir.mkdir(parents=True, exist_ok=True)
 
 x_list = []
 y_list = []
@@ -14,12 +15,10 @@ y_list = []
 labels_map = {"ham": 0, "spam": 1}
 
 for folder_name, label in labels_map.items():
-    folder_path = os.path.join(raw_dir, folder_name)
+    folder_path = raw_dir / folder_name
 
-    for file_name in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, file_name)
-
-        image = cv2.imread(file_path, cv2.IMREAD_COLOR)
+    for file_path in folder_path.iterdir():
+        image = cv2.imread(str(file_path), cv2.IMREAD_COLOR)
 
         if image is None:
             continue
