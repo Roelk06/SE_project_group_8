@@ -1,4 +1,4 @@
-import pandas as pd
+from urllib.parse import urlparse
 SUPPORTED_TYPES = {"sms", "email", "url", "image"}
 
 def validate_sms(data):
@@ -18,6 +18,22 @@ def validate_email(data):
         raise ValueError("Email must have text.")
 
     return data
+
+def validate_url(data):
+    if not isinstance(data, str) or not data.strip():
+        raise ValueError("URL input must have text.")
+
+    url = data.strip()
+    parsed = urlparse(url if "://" in url else "//" + url)
+
+    if not parsed.netloc or "." not in parsed.netloc:
+        raise ValueError("Invalid URL.")
+
+    if parsed.scheme and parsed.scheme not in ("http", "https"):
+        raise ValueError("Unsupported URL scheme.")
+
+    return data
+
 def route_input(input_type, data):
     input_type = input_type.lower()
 
@@ -30,20 +46,12 @@ def route_input(input_type, data):
 
     if input_type == "email": 
         validate_email(data)
-        return "Email input routed succesfully"
+        return "Email input routed succesfully!"
+
+    if input_type == "url":
+        validate_url(data)
+        return "URL input routed succesfully!"
 
     return f"{input_type} routing not implemented yet."
 
-#tests
-#print(route_input("sms", "Hello this is a test message"))
-#print(route_input("sms", "   "))
-#print(route_input("video", "test"))
-#email_test = {"subject": "You won!","message": "Click here to claim your prize."}
-
-# Test 7: wrong data type
-email7 = {
-    "subject": 123,
-    "message": "Hello"
-}
-print(route_input("email", email7))
-
+print(route_input("url", "ftp://example.com"))
