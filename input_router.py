@@ -59,7 +59,7 @@ def route_input(input_type, data):
 
     if input_type == "sms":
         validate_sms(data)
-        return "SMS input routed succesfully!"
+        return f"SMS input routed succesfully!"
 
     if input_type == "email": 
         validate_email(data)
@@ -75,4 +75,5 @@ def route_input(input_type, data):
 
     return f"{input_type} routing not implemented yet."
 
-print(route_input("image", "document.pdf"))
+if __name__ == "__main__":
+    print(route_input("sms", "Congratulations! You have won a free prize!"))
