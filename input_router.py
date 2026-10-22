@@ -1,5 +1,8 @@
+from pathlib import Path
 from urllib.parse import urlparse
+
 SUPPORTED_TYPES = {"sms", "email", "url", "image"}
+SUPPORTED_IMAGE_TYPES = {".jpg", ".jpeg"}
 
 def validate_sms(data):
     if not isinstance(data, str) or not data.strip():
@@ -34,6 +37,20 @@ def validate_url(data):
 
     return data
 
+def validate_image(data):
+    if not isinstance(data, (str, Path)):
+        raise ValueError("image input must be a file path.")
+
+    image_path = Path(data)
+
+    if image_path.suffix.lower() not in SUPPORTED_IMAGE_TYPES:
+        raise ValueError("Unsupported image format.")
+
+    if not image_path.exists():
+        raise ValueError("Image file does not exist.")
+
+    return image_path
+
 def route_input(input_type, data):
     input_type = input_type.lower()
 
@@ -52,6 +69,10 @@ def route_input(input_type, data):
         validate_url(data)
         return "URL input routed succesfully!"
 
+    if input_type == "image":
+        validate_image(data)
+        return "Image input routed succesfully!"
+
     return f"{input_type} routing not implemented yet."
 
-print(route_input("url", "ftp://example.com"))
+print(route_input("image", "document.pdf"))
