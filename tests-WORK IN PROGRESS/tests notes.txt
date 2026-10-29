@@ -1,0 +1,25 @@
+the models that are used are all in a file called "models"
+
+pipelines are all in a file called "pipelines"
+
+data is in its own folder as usual
+
+test files are in a folder like this:
+
+
+(Name of the main folder for this class)
+├── run_tests.py
+├── pytest.ini
+├── pipelines/
+├── models/
+├── data/
+└── tests/
+    ├── conftest.py
+    ├── helpers.py
+    ├── unit/test_prediction_format.py
+    └── integration/
+        ├── test_model_scripts.py
+        └── test_real_data.py
+
+
+normally, if you just run run_tests.py it should have worked, should have printed out results and saved them. Couldn't get it to work yet.
