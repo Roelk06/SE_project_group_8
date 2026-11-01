@@ -1,0 +1,30 @@
+the models that are used are all in a file called "models"
+
+pipelines are all in a file called "pipelines"
+
+data is in its own folder as usual
+
+test files are in a folder like this:
+
+
+(Name of the main folder for this class)
+├── run_tests.py
+├── pytest.ini
+├── pipelines/
+├── models/
+├── data/
+└── tests/
+    ├── conftest.py
+    ├── helpers.py
+    ├── unit/test_prediction_format.py
+    └── integration/
+        ├── test_model_scripts.py
+        └── test_real_data.py
+
+
+Also, if it gives a warning for this line, no worries:
+
+from helpers import candidate_scripts
+
+
+It should work now, just make sure to put the latest version of the models in the model folder there. The example tests I ran all passed. But please create your own tests, because I was just testing to make sure the run_tests functions and can run tests, not real testing.
