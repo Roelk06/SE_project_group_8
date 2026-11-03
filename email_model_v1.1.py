@@ -22,7 +22,7 @@ from sklearn.metrics import (
 # Paths
 # ============================================================
  
-base_dir = Path(__file__).resolve().parent.parent
+base_dir = Path(__file__).resolve().parent
  
 processed_dir = base_dir / "data" / "processed" / "emails"
 model_dir = base_dir / "models"

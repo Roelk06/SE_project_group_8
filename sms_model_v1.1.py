@@ -20,9 +20,9 @@ from sklearn.svm import LinearSVC
 # Paths
 # ============================================================
  
-base_dir = Path(__file__).resolve().parent.parent
+base_dir = Path(__file__).resolve().parent
  
-processed_dir = base_dir / "data" / "processed" / "SMS"
+processed_dir = base_dir / "data" / "processed" / "sms"
 model_dir = base_dir / "models"
  
 model_dir.mkdir(parents=True, exist_ok=True)
