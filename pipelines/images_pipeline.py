@@ -9,39 +9,51 @@ raw_dir = base_dir / "data" / "raw" / "images"
 processed_dir = base_dir / "data" / "processed" / "images"
 processed_dir.mkdir(parents=True, exist_ok=True)
 
-x_list = []
-y_list = []
+def preprocess_image_input(image_path):
+    image = cv2.imread(str(image_path))
+    if image is None:
+        raise ValueError("Could not read image.")
 
-labels_map = {"ham": 0, "spam": 1}
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = cv2.resize(image, (224, 224))
+    image = image.astype(np.float32)
+    image = image / 255.0
+    return image
 
-for folder_name, label in labels_map.items():
-    folder_path = raw_dir / folder_name
+if __name__ == "__main__":
+    x_list = []
+    y_list = []
 
-    for file_path in folder_path.iterdir():
-        image = cv2.imread(str(file_path), cv2.IMREAD_COLOR)
+    labels_map = {"ham": 0, "spam": 1}
 
-        if image is None:
-            continue
+    for folder_name, label in labels_map.items():
+        folder_path = raw_dir / folder_name
 
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = cv2.resize(image, (224, 224))
+        for file_path in folder_path.iterdir():
+            image = cv2.imread(str(file_path), cv2.IMREAD_COLOR)
 
-        x_list.append(image)
-        y_list.append(label)
+            if image is None:
+                continue
 
-x = np.array(x_list, dtype=np.float32)
-y = np.array(y_list)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image = cv2.resize(image, (224, 224))
 
-x = x / 255.0      
-x = np.transpose(x, (0, 3, 1, 2))   
+            x_list.append(image)
+            y_list.append(label)
 
-x_train, x_temp, y_train, y_temp = train_test_split(x, y, test_size=0.3, stratify=y, random_state=42)
-x_val, x_test, y_val, y_test = train_test_split(x_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42)
+    x = np.array(x_list, dtype=np.float32)
+    y = np.array(y_list)
 
-np.save(os.path.join(processed_dir, "x_train.npy"), x_train)
-np.save(os.path.join(processed_dir, "y_train.npy"), y_train)
-np.save(os.path.join(processed_dir, "x_val.npy"), x_val)
-np.save(os.path.join(processed_dir, "y_val.npy"), y_val)
-np.save(os.path.join(processed_dir, "x_test.npy"), x_test)
-np.save(os.path.join(processed_dir, "y_test.npy"), y_test)
+    x = x / 255.0      
+    x = np.transpose(x, (0, 3, 1, 2))   
+
+    x_train, x_temp, y_train, y_temp = train_test_split(x, y, test_size=0.3, stratify=y, random_state=42)
+    x_val, x_test, y_val, y_test = train_test_split(x_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42)
+
+    np.save(os.path.join(processed_dir, "x_train.npy"), x_train)
+    np.save(os.path.join(processed_dir, "y_train.npy"), y_train)
+    np.save(os.path.join(processed_dir, "x_val.npy"), x_val)
+    np.save(os.path.join(processed_dir, "y_val.npy"), y_val)
+    np.save(os.path.join(processed_dir, "x_test.npy"), x_test)
+    np.save(os.path.join(processed_dir, "y_test.npy"), y_test)
 

@@ -1,10 +1,16 @@
+import numpy as np
 import joblib
+import torch
 
+from torch import nn
+from torchvision import models
 from pathlib import Path
 from urllib.parse import urlparse
 
 from pipelines.sms_pipeline import preprocess_sms_input
 from pipelines.email_pipeline import preprocess_email_input
+from pipelines.url_pipeline import preprocess_url_input
+from pipelines.images_pipeline import preprocess_image_input
 
 SUPPORTED_TYPES = {"sms", "email", "url", "image"}
 SUPPORTED_IMAGE_TYPES = {".jpg", ".jpeg"}
@@ -55,6 +61,9 @@ def validate_image(data):
 
     image_path = Path(data)
 
+    if not image_path.is_absolute():
+        image_path = base_dir / image_path
+
     if image_path.suffix.lower() not in SUPPORTED_IMAGE_TYPES:
         raise ValueError("Unsupported image format.")
 
@@ -85,12 +94,30 @@ def route_input(input_type, data):
         return "spam" if prediction == 1 else "ham"
 
     if input_type == "url":
-        validate_url(data)
-        return "URL input routed succesfully!"
+        validated_data = validate_url(data)
+        processed_data = preprocess_url_input(validated_data)
+        model = joblib.load(url_model_path)
+        prediction = model.predict(processed_data)[0]
+        return "phishing" if prediction == 1 else "legitimate"
 
     if input_type == "image":
-        validate_image(data)
-        return "Image input routed succesfully!"
+        validated_data = validate_image(data)
+        processed_data = preprocess_image_input(validated_data)
+        processed_data = np.transpose(processed_data, (2,0,1))
+        processed_data = np.expand_dims(processed_data, axis=0)
+        image_tensor = torch.from_numpy(processed_data).float()
+
+        model = models.resnet18(weights=None)
+        model.fc = nn.Linear(model.fc.in_features, 2)
+        checkpoint = torch.load(image_model_path, weights_only=True)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        spam_threshold = checkpoint["spam_threshold"]
+        model.eval()
+
+        with torch.no_grad():
+            output = model(image_tensor)
+            spam_probability = torch.softmax(output, dim=1)[0,1].item()
+        return "spam" if spam_probability >= spam_threshold else "ham"
 
     return f"{input_type} routing not implemented yet."
 
@@ -118,3 +145,15 @@ if __name__ == "__main__":
     print(route_input("email", {
             "subject": "Dinner",
             "message": "Do you want to grab dinner after work tonight?"}))
+
+    print(route_input("url", "https://www.google.com"))
+    print(route_input("url", "https://www.tilburguniversity.edu"))
+    print(route_input("url", "http://free-prize-login-account.xyz"))
+    print(route_input("url", "http://verify-paypal-account-now.ru"))
+    print(route_input("url", "https://github.com"))
+
+    print(route_input("image", "data/raw/images/ham/zzz_test_32.jpg"))
+    print(route_input("image", "data/raw/images/ham/zzz_test_36.JPG"))
+    print(route_input("image", "data/raw/images/ham/zzz_test_45.jpg"))
+    print(route_input("image", "data/raw/images/spam/undecided.jpg"))
+    print(route_input("image", "data/raw/images/spam/underclassmen.6.jpg"))
