@@ -10,7 +10,7 @@ if "history" not in st.session_state:
     st.session_state.history = []
 
 
-def mock_analyzing_input(modality: str, payload: any, filename: str = "Direct Input") -> dict:
+def mock_analyzing_input(modality: str, payload: any, source_name: str = "Direct Input") -> dict:
     """
     Placeholder interface for the backend.
     Later, we will replace the body of this function with our actual router/model call.
@@ -26,7 +26,7 @@ def mock_analyzing_input(modality: str, payload: any, filename: str = "Direct In
     latency_ms = round((time.perf_counter() - start_time) * 1000, 1)
 
     return {
-        "source": filename,
+        "source": source_name,
         "modality": modality,
         "prediction": "Spam" if is_suspicious else "Ham",
         "is_spam": is_suspicious,
