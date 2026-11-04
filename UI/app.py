@@ -72,7 +72,7 @@ with st.sidebar:
         st.rerun()
 
 
-st.title("🛡️ Multi-Modal Spame Detector")
+st.title("🛡️ Multi-Modal Spam Detector")
 st.write("Submit text, images or URLs to check for spam content.")
 
 tab_text, tab_url, tab_file = st.tabs(["📝 Text / Email Body", "🔗 URL Check", "📂 File / Image Upload"])
