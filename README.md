@@ -3,3 +3,26 @@ A school project for the course: Software Engineering for CSAI.
 
 
 Please check with the person who wrote the code if you remove or change it.
+
+## Project structure
+
+```
+├── input_router.py     takes an SMS, email, URL or image and returns the model's prediction
+├── pipelines/          preprocessing for each input type
+├── training/           training scripts for each model (latest versions)
+│   └── archive/        original versions, kept for reference and not meant to be run
+├── tests/              unit and integration tests (see tests/notes.txt)
+├── run_tests.py        runs the tests and writes tests/test_report.md
+├── pytest.ini          pytest settings
+├── data/               datasets (not in git)
+└── models/             saved models (not in git)
+```
+
+Run everything from the project folder, for example:
+
+```
+python pipelines/sms_pipeline.py
+python training/sms_model_v1.1.py
+python input_router.py
+python run_tests.py
+```

@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 from scipy.sparse import csr_matrix, save_npz
 
-# project folder = the folder that contains tests/, models/, data/ ...
+# project folder = the folder that contains tests/, training/, models/, data/ ...
 ROOT = Path(__file__).resolve().parent.parent
 
 EXPECTED_CLASS_NAMES = ["ham", "spam"]
@@ -32,22 +32,19 @@ def candidate_scripts(script_name):
     version number does not:  "sms_model.py"  matches  sms_model.py, sms_model_v1.1.py,
     sms_model_v2.py ...  but not  sms_model_backup.py.
 
-    Looks in models/ first, then in the project folder (sub folders such as an "old" folder
-    are NOT searched). If several versions are in the same folder, the highest version wins
-    (compared as numbers, so v1.10 beats v1.9); a file without a version number is the lowest.
+    Looks in training/ (sub folders such as training/archive/ are NOT searched). If several
+    versions are in the folder, the highest version wins (compared as numbers, so v1.10 beats
+    v1.9); a file without a version number is the lowest.
     """
     kind = script_name.split("_model")[0]  # "sms_model.py" -> "sms"
     pattern = re.compile(
         rf"^{re.escape(kind)}_model(?:[_\-. ]?v?\d[\w.\-]*)?\.py$", re.IGNORECASE
     )
-    for folder in (ROOT / "models", ROOT):
-        if not folder.is_dir():
-            continue
-        matches = [p for p in folder.iterdir() if p.is_file() and pattern.match(p.name)]
-        if matches:
-            return sorted(matches, key=lambda p: (_version_of(p.name), p.stat().st_mtime),
-                          reverse=True)
-    return []
+    folder = ROOT / "training"
+    if not folder.is_dir():
+        return []
+    matches = [p for p in folder.iterdir() if p.is_file() and pattern.match(p.name)]
+    return sorted(matches, key=lambda p: (_version_of(p.name), p.stat().st_mtime), reverse=True)
 
 
 def locate_script(script_name):
@@ -61,7 +58,7 @@ def find_script(script_name):
     if path is None:
         pytest.fail(
             f"Could not find a script matching {script_name.replace('.py', '')}*.py "
-            f"in {ROOT / 'models'} or {ROOT}"
+            f"in {ROOT / 'training'}"
         )
     return path
 
@@ -173,29 +170,29 @@ def write_image_dataset(folder, train=64, val=32, test=32, size=32):
 def run_script_in_sandbox(script_name, data_folder, data_writer, tmp_path,
                           text_edits=None, timeout=300):
     """
-    Builds   <tmp>/project/models/<script>   and   <tmp>/project/data/processed/<data_folder>/
-    (the same layout as the real project), then runs the script from inside models/.
+    Builds   <tmp>/project/training/<script>   and   <tmp>/project/data/processed/<data_folder>/
+    (the same layout as the real project), then runs the script from inside training/.
     Real data and real saved models are never touched.
 
     text_edits: optional list of (old, new) replacements applied to the COPY of the script
     (used by the image test to skip downloading pretrained weights).
     """
     project = tmp_path / "project"
-    models_dir = project / "models"
-    models_dir.mkdir(parents=True)
+    training_dir = project / "training"
+    training_dir.mkdir(parents=True)
 
     source = find_script(script_name).read_text(encoding="utf-8")
     for old, new in (text_edits or []):
         assert old in source, f"text not found in {script_name}: {old!r}"
         source = source.replace(old, new)
-    (models_dir / script_name).write_text(source, encoding="utf-8")
+    (training_dir / script_name).write_text(source, encoding="utf-8")
 
     data_writer(project / "data" / "processed" / data_folder)
 
     env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONWARNINGS="ignore")
     result = subprocess.run(
         [sys.executable, script_name],
-        cwd=models_dir,
+        cwd=training_dir,
         capture_output=True,
         text=True,
         encoding="utf-8",

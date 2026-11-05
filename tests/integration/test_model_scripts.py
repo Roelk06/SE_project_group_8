@@ -55,7 +55,7 @@ def test_svm_script_runs_end_to_end(script, data_folder, model_file, tmp_path):
     """
     Purpose: the SMS and email scripts train, evaluate and save a working model.
     Test data: toy sparse data (150 train / 50 val / 50 test) written into
-    data/processed/<SMS or emails>/ of a temporary project; script run from models/.
+    data/processed/<SMS or emails>/ of a temporary project; script run from training/.
     Expected: exit code 0, all report sections printed, the .joblib model is saved,
     and the reloaded model gives correctly formatted predictions on new samples.
     """
@@ -83,7 +83,7 @@ def test_url_script_runs_end_to_end(tmp_path):
     Purpose: the URL script trains, tunes its threshold, saves the model together with
     that threshold, and the saved result can be used for standardized predictions.
     Test data: toy sparse data (150 train / 50 val / 50 test) in data/processed/urls/
-    of a temporary project; script run from inside models/.
+    of a temporary project; script run from inside training/.
     Expected: exit code 0, all report sections printed, url_logistic_regression.joblib
     saved with a bad_threshold_ value, and correctly formatted predictions using it.
     """

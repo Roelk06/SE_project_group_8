@@ -1,4 +1,6 @@
-the models that are used are all in a file called "models"
+the training scripts are all in a folder called "training" (older versions are in training/archive)
+
+the saved models are all in a folder called "models"
 
 pipelines are all in a file called "pipelines"
 
@@ -11,6 +13,7 @@ test files are in a folder like this:
 ├── run_tests.py
 ├── pytest.ini
 ├── pipelines/
+├── training/
 ├── models/
 ├── data/
 └── tests/
@@ -27,4 +30,4 @@ Also, if it gives a warning for this line, no worries:
 from helpers import candidate_scripts
 
 
-It should work now, just make sure to put the latest version of the models in the model folder there. The example tests I ran all passed. But please create your own tests, because I was just testing to make sure the run_tests functions and can run tests, not real testing.
+It should work now, just make sure to put the latest version of the training scripts in the training folder. The example tests I ran all passed. But please create your own tests, because I was just testing to make sure the run_tests functions and can run tests, not real testing.

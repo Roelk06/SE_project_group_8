@@ -23,8 +23,7 @@ from torchvision import models
  
  
 # works from the project folder or from inside the models folder
-script_dir = Path(__file__).resolve().parent
-base_dir = script_dir.parent if script_dir.name == "models" else script_dir
+base_dir = Path(__file__).resolve().parent.parent
 processed_dir = base_dir / "data" / "processed" / "images"
 model_dir = base_dir / "models"
 model_dir.mkdir(parents=True, exist_ok=True)
