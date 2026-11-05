@@ -7,7 +7,7 @@ Please check with the person who wrote the code if you remove or change it.
 ## Project structure
 
 ```
-├── input_router.py     takes an SMS, email, URL or image and returns the model's prediction
+├── input_router.py     gets the model's prediction, puts spam in results/spam and the rest in results/ham
 ├── pipelines/          preprocessing for each input type
 ├── training/           training scripts for each model (latest versions)
 │   └── archive/        original versions, kept for reference and not meant to be run
@@ -15,7 +15,8 @@ Please check with the person who wrote the code if you remove or change it.
 ├── run_tests.py        runs the tests and writes tests/test_report.md
 ├── pytest.ini          pytest settings
 ├── data/               datasets (not in git)
-└── models/             saved models (not in git)
+├── models/             saved models (not in git)
+└── results/            sorted inputs (not in git, created when first used)
 ```
 
 Run everything from the project folder, for example:

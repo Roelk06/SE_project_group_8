@@ -7,7 +7,6 @@ from pathlib import Path
 base_dir = Path(__file__).resolve().parent.parent
 raw_dir = base_dir / "data" / "raw" / "images"
 processed_dir = base_dir / "data" / "processed" / "images"
-processed_dir.mkdir(parents=True, exist_ok=True)
 
 def preprocess_image_input(image_path):
     image = cv2.imread(str(image_path))
@@ -21,6 +20,7 @@ def preprocess_image_input(image_path):
     return image
 
 if __name__ == "__main__":
+    processed_dir.mkdir(parents=True, exist_ok=True)
     x_list = []
     y_list = []
 

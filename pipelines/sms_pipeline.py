@@ -12,13 +12,13 @@ from pathlib import Path
 base_dir = Path(__file__).resolve().parent.parent
 raw_file = base_dir / "data" / "raw" / "SMS" / "SMSSpamCollection"
 processed_dir = base_dir / "data" / "processed" / "SMS"
-processed_dir.mkdir(parents=True, exist_ok=True)
 
 def preprocess_sms_input(text):
     vectorizer = joblib.load(processed_dir / "tfidf_vectorizer.pkl")
     return vectorizer.transform([text])
 
 if __name__ == "__main__":
+    processed_dir.mkdir(parents=True, exist_ok=True)
     data = pd.read_csv(raw_file, sep="\t", header=None, names=["label", "text"], quoting=csv.QUOTE_NONE)
     data = data.drop_duplicates(subset="text").copy()
 

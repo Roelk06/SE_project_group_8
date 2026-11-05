@@ -10,13 +10,13 @@ from pathlib import Path
 base_dir = Path(__file__).resolve().parent.parent
 raw_file = base_dir /'data'/'raw'/'urls'/'phishing_site_urls.csv'
 processed_dir = base_dir /'data'/'processed'/'urls'
-processed_dir.mkdir(parents=True, exist_ok=True)
 
 def preprocess_url_input(url):
     vectorizer = joblib.load(processed_dir / "char_tfidf_vectorizer.pkl")
     return vectorizer.transform([url])
 
 if __name__ == "__main__":
+    processed_dir.mkdir(parents=True, exist_ok=True)
     data = pd.read_csv(raw_file)
     data = data.drop_duplicates(subset=["URL"]).copy()
 

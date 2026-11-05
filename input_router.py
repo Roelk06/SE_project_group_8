@@ -1,9 +1,14 @@
+import json
+import shutil
+import uuid
+
 import numpy as np
 import joblib
 import torch
 
 from torch import nn
 from torchvision import models
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -21,6 +26,14 @@ sms_model_path = base_dir / "models" / "sms_linear_svm.joblib"
 email_model_path = base_dir / "models" / "email_linear_svm.joblib"
 url_model_path = base_dir / "models" / "url_logistic_regression.joblib"
 image_model_path = base_dir / "models" / "image_resnet18.pt"
+
+RESULTS_DIR = base_dir / "results"
+LABEL_TO_FOLDER = {
+    "spam": "spam",
+    "phishing": "spam",
+    "ham": "ham",
+    "legitimate": "ham",
+}
 
 def validate_sms(data):
     if not isinstance(data, str) or not data.strip():
@@ -55,14 +68,19 @@ def validate_url(data):
 
     return data
 
-def validate_image(data):
-    if not isinstance(data, (str, Path)):
-        raise ValueError("image input must be a file path.")
-
+def resolve_image_path(data):
     image_path = Path(data)
 
     if not image_path.is_absolute():
         image_path = base_dir / image_path
+
+    return image_path
+
+def validate_image(data):
+    if not isinstance(data, (str, Path)):
+        raise ValueError("image input must be a file path.")
+
+    image_path = resolve_image_path(data)
 
     if image_path.suffix.lower() not in SUPPORTED_IMAGE_TYPES:
         raise ValueError("Unsupported image format.")
@@ -120,6 +138,44 @@ def route_input(input_type, data):
         return "spam" if spam_probability >= spam_threshold else "ham"
 
     return f"{input_type} routing not implemented yet."
+
+def save_result(input_type, data, label, results_dir=RESULTS_DIR):
+    # an unknown label raises a KeyError here, so it can never be let through as not spam
+    folder_name = LABEL_TO_FOLDER[label]
+
+    folder = Path(results_dir) / folder_name
+    folder.mkdir(parents=True, exist_ok=True)
+
+    now = datetime.now()
+    # the random part keeps two results from the same moment from overwriting each other
+    file_stem = f"{now:%Y%m%d-%H%M%S}_{input_type}_{uuid.uuid4().hex[:8]}"
+
+    content = data
+    stored_file = None
+    if input_type == "image":
+        image_path = resolve_image_path(data)
+        stored_path = folder / f"{file_stem}{image_path.suffix.lower()}"
+        shutil.copy2(image_path, stored_path)  # the original image stays where it is
+        content = str(image_path)
+        stored_file = stored_path.name
+
+    record = {
+        "timestamp": now.isoformat(timespec="seconds"),
+        "input_type": input_type,
+        "label": folder_name,
+        "model_label": label,
+        "content": content,
+        "stored_file": stored_file,
+    }
+    record_path = folder / f"{file_stem}.json"
+    record_path.write_text(json.dumps(record, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    return {"label": folder_name, "allowed": folder_name == "ham", "record_path": record_path}
+
+def route_and_sort(input_type, data, results_dir=RESULTS_DIR):
+    # spam/phishing goes to results/spam (blocked), ham/legitimate to results/ham (let through)
+    label = route_input(input_type, data)
+    return save_result(input_type.lower(), data, label, results_dir)
 
 if __name__ == "__main__":
 
