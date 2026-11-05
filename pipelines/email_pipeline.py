@@ -10,7 +10,6 @@ from pathlib import Path
 base_dir = Path(__file__).resolve().parent.parent
 raw_file = base_dir /'data'/'raw'/'emails'/'enron_spam_data.csv'
 processed_dir = base_dir /'data'/'processed'/'emails'
-processed_dir.mkdir(parents=True, exist_ok=True)
 
 def preprocess_email_input(data):
     subject = data["subject"]
@@ -20,6 +19,7 @@ def preprocess_email_input(data):
     return vectorizer.transform([text])
 
 if __name__ == "__main__":
+    processed_dir.mkdir(parents=True, exist_ok=True)
     data = pd.read_csv(raw_file)
     data['text'] = data["Subject"].fillna('') + ' ' + data["Message"].fillna('')
 
