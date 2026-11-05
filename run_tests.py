@@ -42,7 +42,7 @@ def check_model_scripts():
     for name in MODEL_SCRIPTS:
         found = candidate_scripts(name)
         if not found:
-            print(f"  {name.replace('.py', ''):<14} NOT FOUND (looked in models/ and the project folder)")
+            print(f"  {name.replace('.py', ''):<14} NOT FOUND (looked in training/)")
             problems.append(name)
             continue
         path = found[0]

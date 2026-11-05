@@ -1,28 +1,30 @@
-#SMS model
+#Email model
 import time
 from pathlib import Path
  
 import joblib
 import numpy as np
+ 
 from scipy.sparse import load_npz
+ 
+from sklearn.svm import LinearSVC
 from sklearn.metrics import (
     accuracy_score,
-    classification_report,
-    confusion_matrix,
     precision_score,
     recall_score,
     f1_score,
+    classification_report,
+    confusion_matrix
 )
-from sklearn.svm import LinearSVC
  
  
 # ============================================================
 # Paths
 # ============================================================
  
-base_dir = Path(__file__).resolve().parent
+base_dir = Path(__file__).resolve().parent.parent
  
-processed_dir = base_dir / "data" / "processed" / "sms"
+processed_dir = base_dir / "data" / "processed" / "emails"
 model_dir = base_dir / "models"
  
 model_dir.mkdir(parents=True, exist_ok=True)
@@ -72,6 +74,7 @@ y_test = np.load(processed_dir / "y_test.npy")
  
  
 print("Data loaded successfully.")
+ 
 print(f"Training samples:   {X_train.shape[0]}")
 print(f"Validation samples: {X_val.shape[0]}")
 print(f"Test samples:       {X_test.shape[0]}")
@@ -79,7 +82,7 @@ print(f"Number of features: {X_train.shape[1]}")
  
  
 # ============================================================
-# Create model
+# Create Linear SVM
 # ============================================================
  
 model = LinearSVC(
@@ -90,7 +93,7 @@ model = LinearSVC(
  
  
 # ============================================================
-# Train model
+# Train
 # ============================================================
  
 print("\nTraining Linear SVM...")
@@ -114,10 +117,11 @@ print("=" * 60)
  
 print(f"Training time:      {training_time:.4f} seconds")
 print(f"Iterations used:    {n_iterations} (max allowed: {model.max_iter})")
+
  
  
 # ============================================================
-# Evaluate on validation set
+# Validation evaluation
 # ============================================================
  
 y_val_pred = model.predict(X_val)
@@ -132,6 +136,7 @@ print(f"Recall:    {recall_score(y_val, y_val_pred):.4f}")
 print(f"F1 score:  {f1_score(y_val, y_val_pred):.4f}")
  
 print("\nClassification report:")
+ 
 print(
     classification_report(
         y_val,
@@ -141,11 +146,17 @@ print(
 )
  
 print("Confusion matrix:")
-print(confusion_matrix(y_val, y_val_pred))
+ 
+print(
+    confusion_matrix(
+        y_val,
+        y_val_pred
+    )
+)
  
  
 # ============================================================
-# Evaluate on test set
+# Test evaluation
 # ============================================================
  
 start_time = time.perf_counter()
@@ -162,6 +173,7 @@ print(f"Recall:    {recall_score(y_test, y_test_pred):.4f}")
 print(f"F1 score:  {f1_score(y_test, y_test_pred):.4f}")
  
 print("\nClassification report:")
+ 
 print(
     classification_report(
         y_test,
@@ -171,7 +183,13 @@ print(
 )
  
 print("Confusion matrix:")
-print(confusion_matrix(y_test, y_test_pred))
+ 
+print(
+    confusion_matrix(
+        y_test,
+        y_test_pred
+    )
+)
  
 print(f"\nInference time (whole test set): {inference_time:.4f} seconds")
 print(f"Inference time (per sample):     {inference_time / X_test.shape[0] * 1000:.4f} ms")
@@ -193,10 +211,10 @@ for i, result in enumerate(example_results):
  
  
 # ============================================================
-# Save trained model
+# Save model
 # ============================================================
  
-model_path = model_dir / "sms_linear_svm.joblib"
+model_path = model_dir / "email_linear_svm.joblib"
  
 joblib.dump(model, model_path)
  
