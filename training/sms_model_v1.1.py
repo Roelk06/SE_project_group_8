@@ -22,7 +22,7 @@ from sklearn.svm import LinearSVC
  
 base_dir = Path(__file__).resolve().parent.parent
  
-processed_dir = base_dir / "data" / "processed" / "sms"
+processed_dir = base_dir / "data" / "processed" / "SMS"
 model_dir = base_dir / "models"
  
 model_dir.mkdir(parents=True, exist_ok=True)
