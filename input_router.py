@@ -90,7 +90,16 @@ def validate_image(data):
 
     return image_path
 
+def svm_prediction(model, processed_data):
+    # same confidence as predict_with_confidence in the SMS and email training scripts:
+    # the further from the decision boundary, the closer to 1.0
+    score = model.decision_function(processed_data)[0]
+    prediction = model.predict(processed_data)[0]
+    confidence = 1.0 / (1.0 + np.exp(-abs(score)))
+    return ("spam" if prediction == 1 else "ham"), round(float(confidence), 4)
+
 def route_input(input_type, data):
+    # returns (label, confidence), for example ("spam", 0.93)
     input_type = input_type.lower()
 
     if input_type not in SUPPORTED_TYPES:
@@ -100,23 +109,26 @@ def route_input(input_type, data):
         validated_data = validate_sms(data)
         processed_data = preprocess_sms_input(validated_data)
         model = joblib.load(sms_model_path)
-        prediction = model.predict(processed_data)[0]
-        return "spam" if prediction == 1 else "ham"
+        return svm_prediction(model, processed_data)
     
 
     if input_type == "email": 
         validated_data = validate_email(data)
         processed_data = preprocess_email_input(validated_data)
         model = joblib.load(email_model_path)
-        prediction = model.predict(processed_data)[0]
-        return "spam" if prediction == 1 else "ham"
+        return svm_prediction(model, processed_data)
 
     if input_type == "url":
         validated_data = validate_url(data)
         processed_data = preprocess_url_input(validated_data)
         model = joblib.load(url_model_path)
-        prediction = model.predict(processed_data)[0]
-        return "phishing" if prediction == 1 else "legitimate"
+        # use the threshold tuned in training (saved inside the model), not the default cutoff;
+        # same as predict_with_confidence in the URL training script
+        score = model.decision_function(processed_data)[0]
+        bad_probability = model.predict_proba(processed_data)[0, 1]
+        if score >= model.bad_threshold_:
+            return "phishing", round(float(bad_probability), 4)
+        return "legitimate", round(float(1.0 - bad_probability), 4)
 
     if input_type == "image":
         validated_data = validate_image(data)
@@ -135,11 +147,14 @@ def route_input(input_type, data):
         with torch.no_grad():
             output = model(image_tensor)
             spam_probability = torch.softmax(output, dim=1)[0,1].item()
-        return "spam" if spam_probability >= spam_threshold else "ham"
+        # same as predict_with_confidence in the image training script
+        if spam_probability >= spam_threshold:
+            return "spam", round(spam_probability, 4)
+        return "ham", round(1.0 - spam_probability, 4)
 
-    return f"{input_type} routing not implemented yet."
+    raise ValueError(f"{input_type} routing not implemented yet.")
 
-def save_result(input_type, data, label, results_dir=RESULTS_DIR):
+def save_result(input_type, data, label, results_dir=RESULTS_DIR, confidence=None):
     # an unknown label raises a KeyError here, so it can never be let through as not spam
     folder_name = LABEL_TO_FOLDER[label]
 
@@ -164,18 +179,24 @@ def save_result(input_type, data, label, results_dir=RESULTS_DIR):
         "input_type": input_type,
         "label": folder_name,
         "model_label": label,
+        "confidence": confidence,
         "content": content,
         "stored_file": stored_file,
     }
     record_path = folder / f"{file_stem}.json"
     record_path.write_text(json.dumps(record, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    return {"label": folder_name, "allowed": folder_name == "ham", "record_path": record_path}
+    return {
+        "label": folder_name,
+        "allowed": folder_name == "ham",
+        "confidence": confidence,
+        "record_path": record_path,
+    }
 
 def route_and_sort(input_type, data, results_dir=RESULTS_DIR):
     # spam/phishing goes to results/spam (blocked), ham/legitimate to results/ham (let through)
-    label = route_input(input_type, data)
-    return save_result(input_type.lower(), data, label, results_dir)
+    label, confidence = route_input(input_type, data)
+    return save_result(input_type.lower(), data, label, results_dir, confidence)
 
 if __name__ == "__main__":
 

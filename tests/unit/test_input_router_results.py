@@ -18,7 +18,7 @@ def read_record(result):
 
 
 def fake_router(monkeypatch, label):
-    monkeypatch.setattr(input_router, "route_input", lambda input_type, data: label)
+    monkeypatch.setattr(input_router, "route_input", lambda input_type, data: (label, 0.9))
 
 
 @pytest.mark.parametrize(
