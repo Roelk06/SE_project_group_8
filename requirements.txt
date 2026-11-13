@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+requests
+streamlit
+pillow
+pydantic
+joblib
+numpy
+pandas
+scipy
+scikit-learn
+torch
+torchvision
+opencv-python
