@@ -43,13 +43,6 @@ def analyze_input(
     source_name: str = "Direct Input"
 ) -> dict:
 
-    """
-    Sends user input to the orchestrator.
-
-    The interface does NOT communicate directly
-    with any AI server.
-    """
-
     start_time = time.perf_counter()
 
     response = requests.post(
