@@ -1,14 +1,3 @@
-"""
-Starts the whole system on this computer with one command:
-
-    python start_all.py            orchestrator + 2 AI servers + the Streamlit interface
-    python start_all.py --no-ui    everything except the interface
-
-Everything listens on 127.0.0.1 (localhost) only, so it can only be reached from this computer.
-Press Ctrl+C to stop everything.
-
-(You can also start each part yourself in its own terminal, see DISTRIBUTED_SYSTEM.md.)
-"""
 import argparse
 import subprocess
 import sys
