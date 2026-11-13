@@ -51,6 +51,7 @@ python run_tests.py
 
 ## Project structure
 
+```
 services/
 ├── app.py              Streamlit interface
 ├── orchestrator.py     Request routing service
@@ -68,6 +69,6 @@ pytest.ini              Pytest configuration
 data/                   Datasets and processed data
 models/                 Trained models
 results/                Classified inputs
-
+```
 
 
