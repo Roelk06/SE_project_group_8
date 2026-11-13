@@ -51,7 +51,7 @@ def main():
 
         if not args.no_ui:
             env_note = "" if args.port == 8000 else f"  (set ORCHESTRATOR_URL={url} first)"
-            start("interface" + env_note, [python, "-m", "streamlit", "run", "app.py",
+            start("interface" + env_note, [python, "-m", "streamlit", "run", str(ROOT / "services" / "app.py"),
                                            "--server.address", HOST,
                                            "--browser.gatherUsageStats", "false"])
 
