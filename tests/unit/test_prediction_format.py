@@ -9,7 +9,7 @@ import pytest
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
 
-from helpers import (
+from tests.helpers import (
     EXPECTED_CLASS_NAMES,
     assert_standard_result,
     load_prediction_function,

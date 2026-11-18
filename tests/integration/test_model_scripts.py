@@ -9,7 +9,7 @@ the saved model file and the standardized prediction function.
 import joblib
 import pytest
 
-from helpers import (
+from tests.helpers import (
     assert_standard_result,
     outdated_hint,
     load_prediction_function,

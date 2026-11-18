@@ -1,17 +1,3 @@
-"""
-Runs the whole test suite and shows the results.
-
-Usage (from the project folder):
-    python run_tests.py                 run everything
-    python run_tests.py unit            only the unit tests
-    python run_tests.py integration     only the integration tests
-
-It prints every test as it runs, then a summary table, and saves a report with the
-test cases (purpose, test data, expected result) and their results to
-tests/test_report.md.
-
-Needs pytest:   pip install pytest
-"""
 import inspect
 import os
 import sys
@@ -34,8 +20,7 @@ MODEL_SCRIPTS = ["sms_model.py", "email_model.py", "images_model.py", "url_model
 
 def check_model_scripts():
     """Prints which model script file will be tested for each model, and whether it has the upgrades."""
-    sys.path.insert(0, str(ROOT / "tests"))
-    from helpers import candidate_scripts  # same lookup the tests use
+    from tests.helpers import candidate_scripts 
 
     print("Checking model scripts...")
     problems = []

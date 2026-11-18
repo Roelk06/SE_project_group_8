@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 from scipy.sparse import load_npz
 
-from helpers import ROOT, assert_standard_result, load_prediction_function
+from tests.helpers import ROOT, assert_standard_result, load_prediction_function
 
 pytestmark = pytest.mark.integration  # every test in this file is an integration test
 
