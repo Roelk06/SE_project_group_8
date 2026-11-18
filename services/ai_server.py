@@ -17,6 +17,7 @@ import sys
 import tempfile
 import threading
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -31,7 +32,20 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
-app = FastAPI(title="Spam Detector AI Worker")
+@asynccontextmanager
+async def lifespan(app):
+    # Runs once when the server starts. Load the models first, then register:
+    # the orchestrator only sends requests to servers that are ready.
+    # (Skipped when there is no server name, for example when tests import this file.)
+    if SERVER_NAME:
+        print(f"{SERVER_NAME}: loading the models and pipelines...")
+        get_router()
+        register_with_orchestrator()
+        threading.Thread(target=heartbeat_loop, daemon=True).start()
+    yield
+
+
+app = FastAPI(title="Spam Detector AI Worker", lifespan=lifespan)
 
 SERVER_NAME = ""
 SUPPORTED_TYPES = []
@@ -287,15 +301,6 @@ def main():
         raise ValueError(
             "Specify --port for an unrecognised AI server name."
         )
-
-    # Load the models first, then register: the orchestrator
-    # only sends requests to servers that are ready.
-    @app.on_event("startup")
-    def startup():
-        print(f"{SERVER_NAME}: loading the models and pipelines...")
-        get_router()
-        register_with_orchestrator()
-        threading.Thread(target=heartbeat_loop, daemon=True).start()
 
     print(f"Starting {SERVER_NAME} on port {PORT}")
 
