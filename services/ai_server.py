@@ -128,12 +128,16 @@ def classify(modality: str, payload) -> dict:
 
     is_spam = label in SPAM_LABELS
 
+    model = MODEL_NAMES[modality]
+    if modality == "url" and router.is_trusted_domain(data):
+        model = "trusted domain list"
+
     return {
         "prediction": label.capitalize(),
         "label": label,
         "is_spam": is_spam,
         "confidence": confidence,
-        "model": MODEL_NAMES[modality],
+        "model": model,
         "stored_in": f"results/{stored['label']}"
     }
 

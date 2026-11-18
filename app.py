@@ -87,7 +87,12 @@ def display_result(result: dict, threshold: float):
         st.warning("The analysis was not completed.")
         return
 
-    if result["is_spam"]:
+    if result["confidence"] < threshold:
+        # the model is not sure enough, so do not present the answer as certain
+        st.warning(
+            f"❓ **Uncertain: probably {result['prediction']}**"
+        )
+    elif result["is_spam"]:
         st.error(
             f"⚠️ **Classification: {result['prediction']}**"
         )
@@ -123,9 +128,9 @@ def display_result(result: dict, threshold: float):
         st.caption(f"Stored in: {result['stored_in']} ({action})")
 
     if result["confidence"] < threshold:
-        st.warning(
-            "The prediction is below your selected "
-            "confidence threshold. Consider reviewing it."
+        st.caption(
+            "The confidence is below your selected threshold "
+            "(see the sidebar), so please review this one yourself."
         )
 
 
@@ -188,7 +193,7 @@ with st.sidebar:
         "Confidence Threshold",
         min_value=0.5,
         max_value=0.99,
-        value=0.75,
+        value=0.70,
         step=0.05
     )
 

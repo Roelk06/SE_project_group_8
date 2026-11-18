@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 
 from pipelines.sms_pipeline import preprocess_sms_input
 from pipelines.email_pipeline import preprocess_email_input
-from pipelines.url_pipeline import preprocess_url_input
+from pipelines.url_pipeline import preprocess_url_input, is_trusted_domain
 from pipelines.images_pipeline import preprocess_image_input
 
 SUPPORTED_TYPES = {"sms", "email", "url", "image"}
@@ -120,6 +120,9 @@ def route_input(input_type, data):
 
     if input_type == "url":
         validated_data = validate_url(data)
+        # well-known websites are always legitimate (see TRUSTED_DOMAINS in the URL pipeline)
+        if is_trusted_domain(validated_data):
+            return "legitimate", 1.0
         processed_data = preprocess_url_input(validated_data)
         model = joblib.load(url_model_path)
         # use the threshold tuned in training (saved inside the model), not the default cutoff;
